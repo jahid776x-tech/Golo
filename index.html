@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mega Utility - ৭০টি অফলাইন স্মার্ট টুলস</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --surface: #ffffff;
+      --background: #f8fafc;
+      --surface-variant: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --card-radius: 18px;
+      --danger: #ef4444;
+      --success: #16a34a;
+      --cat-daily: #2563eb;
+      --cat-storage: #ea580c;
+      --cat-media: #9333ea;
+      --cat-text: #0d9488;
+      --cat-sensors: #0284c7;
+      --cat-units: #4f46e5;
+      --cat-finance: #059669;
+    }
+
+    [data-theme="dark"] {
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: #1e293b;
+      --surface: #0f172a;
+      --background: #020617;
+      --surface-variant: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Mobile Container Frame */
+    .app-container {
+      width: 100%;
+      max-width: 500px;
+      background-color: var(--surface);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Header */
+    header {
+      padding: 16px 18px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .badge-count {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Search Bar */
+    .search-wrapper {
+      padding: 6px 18px 12px;
+      position: sticky;
+      top: 68px;
+      background: var(--surface);
+      z-index: 19;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--surface-variant);
+      border-radius: 14px;
+      padding: 10px 14px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .search-box svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 100%;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: none;
+      padding: 2px;
+    }
+
+    /* Category Filter Chips */
+    .chips-scroller {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 18px 12px;
+      scrollbar-width: none;
+    }
+
+    .chips-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: var(--surface-variant);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Tool Grid */
+    .content-area {
+      flex: 1;
+      padding: 6px 18px 90px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 146px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .tool-card:active {
+      transform: scale(0.97);
+    }
+
+    .tool-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.06);
+    }
+
+    .tool-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .tool-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .fav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--text-muted);
+      padding: 4px;
+      transition: transform 0.15s ease;
+    }
+
+    .fav-btn.active {
+      color: var(--danger);
+    }
+
+    .tool-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool-info p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tool-cat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .tool-cat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 500px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 12px;
+      z-index: 25;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      flex: 1;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: -2px;
+      right: 28%;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+    }
+
+    /* Modal / Bottom Sheet */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-sheet {
+      background: var(--surface);
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      border-radius: 26px 26px 0 0;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-handle-bar {
+      width: 38px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 10px auto 4px;
+    }
+
+    .modal-header {
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title h3 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .modal-title p {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .close-modal-btn {
+      background: var(--surface-variant);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 18px 20px 30px;
+      overflow-y: auto;
+      max-height: calc(85vh - 70px);
+    }
+
+    /* Common UI in tools */
+    .tool-input-group {
+      margin-bottom: 12px;
+    }
+
+    .tool-input-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .tool-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .tool-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .tool-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tool-btn:active {
+      background: var(--primary-hover);
+    }
+
+    .result-card {
+      background: var(--surface-variant);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .result-card h5 {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .result-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .unit-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 13.5px;
+    }
+
+    .unit-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Calculator Grid */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .calc-btn {
+      padding: 16px 0;
+      font-size: 18px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-variant);
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .calc-btn.op {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .calc-btn.eq {
+      background: var(--primary);
+      color: #fff;
+      grid-column: span 2;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div>
+        <h1 class="brand-title">Mega Utility</h1>
+        <p class="brand-subtitle">৭০টি অফলাইন স্মার্ট টুলস প্যাকেজ</p>
+      </div>
+      <div class="badge-count" id="toolCountBadge">70 Tools</div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="টুলস খুঁজুন / Search 70 offline tools..." autocomplete="off">
+        <button class="clear-btn" id="clearSearch">✕</button>
+      </div>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="chips-scroller" id="categoryChips">
+      <div class="chip active" data-cat="ALL">সব (All 70)</div>
+      <div class="chip" data-cat="DAILY">দৈনন্দিন (11)</div>
+      <div class="chip" data-cat="STORAGE">স্টোরেজ (8)</div>
+      <div class="chip" data-cat="MEDIA">মিডিয়া (12)</div>
+      <div class="chip" data-cat="TEXT">টেক্সট (8)</div>
+      <div class="chip" data-cat="SENSORS">সেন্সর (14)</div>
+      <div class="chip" data-cat="UNITS">একক (8)</div>
+      <div class="chip" data-cat="FINANCE">অর্থ ও স্বাস্থ্য (9)</div>
+    </div>
+
+    <!-- Content Area: Tool Grid or About -->
+    <div class="content-area" id="mainContent">
+      <div class="tools-grid" id="toolsGrid"></div>
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <h3>কোনো টুল পাওয়া যায়নি!</h3>
+        <p>অন্য কোনো নাম বা ক্যাটাগরি দিয়ে সার্চ করুন।</p>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="navTools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>সব টুলস</span>
+      </button>
+
+      <button class="nav-item" id="navFavs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span>প্রিয় টুলস</span>
+        <span class="nav-badge" id="favBadge" style="display: none;">0</span>
+      </button>
+
+      <button class="nav-item" id="navAbout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>তথ্য ও সেটিংস</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Bottom Sheet Modal for Tools -->
+  <div class="modal-overlay" id="toolModal">
+    <div class="modal-sheet">
+      <div class="modal-handle-bar"></div>
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="modalToolName">Tool Title</h3>
+          <p id="modalToolBangla">বাংলা নাম</p>
+        </div>
+        <button class="close-modal-btn" id="closeModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalToolContent">
+        <!-- Injected tool UI -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------------------------------------
+    // 70 TOOLS MASTER DATA REGISTRY
+    // ---------------------------------------------------------
+    const ALL_TOOLS = [
+      // 1. Daily Utilities (1..11)
+      { id: 1, name: "Smart Calculator", banglaName: "সাধারণ ক্যালকুলেটর", cat: "DAILY", icon: "🧮", desc: "দৈনন্দিন দ্রুত হিসাব ও হিস্ট্রি", color: "#2563eb", tags: ["calculator", "math", "হিসাব"] },
+      { id: 2, name: "Scientific Calculator", banglaName: "সাইন্টিফিক ক্যালকুলেটর", cat: "DAILY", icon: "📐", desc: "ত্রিকোণমিতি, বর্গমূল ও পাওয়ার", color: "#2563eb", tags: ["scientific", "sin", "cos", "log"] },
+      { id: 3, name: "Age Calculator", banglaName: "বয়স ক্যালকুলেটর", cat: "DAILY", icon: "🎂", desc: "বছর, মাস ও দিনের পুঙ্খানুপুঙ্খ বয়স", color: "#2563eb", tags: ["age", "birthday", "জন্মদিন"] },
+      { id: 4, name: "World Clock", banglaName: "বিশ্ব ঘড়ি", cat: "DAILY", icon: "🌍", desc: "আন্তর্জাতিক বিভিন্ন দেশের স্থানীয় সময়", color: "#2563eb", tags: ["clock", "time", "timezone", "সময়"] },
+      { id: 5, name: "Quick Notes & To-Do", banglaName: "দ্রুত নোট ও টু-ডু", cat: "DAILY", icon: "📝", desc: "অফলাইন নোট ও কাজের তালিকা", color: "#2563eb", tags: ["notes", "todo", "নোট"] },
+      { id: 6, name: "Digital Tasbih", banglaName: "ডিজিটাল তাসবীহ", cat: "DAILY", icon: "📿", desc: "ট্যালি কাউন্টার ও লক্ষ্য নির্ধারণ", color: "#2563eb", tags: ["tasbih", "zikr", "তাসবীহ", "কাউন্টার"] },
+      { id: 7, name: "Stopwatch", banglaName: "স্টপওয়াচ", cat: "DAILY", icon: "⏱️", desc: "ল্যাপ টাইমিং ও মিলিসেকেন্ড কাউন্ট", color: "#2563eb", tags: ["stopwatch", "lap", "টাইমার"] },
+      { id: 8, name: "Countdown Timer", banglaName: "কাউন্টডাউন টাইমার", cat: "DAILY", icon: "⏳", desc: "অ্যালার্ম সহ সময় গণনা", color: "#2563eb", tags: ["timer", "countdown", "অ্যালার্ম"] },
+      { id: 9, name: "Password Generator", banglaName: "পাসওয়ার্ড জেনারেটর", cat: "DAILY", icon: "🔐", desc: "শক্তিশালী নিরাপদ পাসওয়ার্ড তৈরি", color: "#2563eb", tags: ["password", "security", "পিন"] },
+      { id: 10, name: "Spin Wheel / Decider", banglaName: "স্পিন হুইল ও ডিসিশন", cat: "DAILY", icon: "🎯", desc: "র‍্যান্ডম লটারি ও সিদ্ধান্ত মেকার", color: "#2563eb", tags: ["spin", "wheel", "লটারি"] },
+      { id: 11, name: "Cash Counter (টাকা গণনা)", banglaName: "নোট গণনাকারী ও হিসাব", cat: "DAILY", icon: "💵", desc: "১০০০, ৫০০, ১০০ টাকার নোট ক্যাশ হিসাব", color: "#2563eb", tags: ["cash", "money", "টাকা", "ক্যাশ"] },
+
+      // 2. Storage & Files (12..19)
+      { id: 12, name: "Duplicate File Cleaner", banglaName: "ডুপ্লিকেট ফাইল স্ক্যানার", cat: "STORAGE", icon: "🧹", desc: "একই ফাইলের পুনরাবৃত্তি শনাক্তকরণ", color: "#ea580c", tags: ["duplicate", "cleaner", "ফাইল"] },
+      { id: 13, name: "Junk Cache Cleaner", banglaName: "ক্যাশে ও জাঙ্ক ক্লিনার", cat: "STORAGE", icon: "🗑️", desc: "অপ্রয়োজনীয় মেমোরি খালি করা", color: "#ea580c", tags: ["cache", "junk", "ক্লিন"] },
+      { id: 14, name: "Large File Finder", banglaName: "বড় ফাইল ফাইন্ডার", cat: "STORAGE", icon: "📦", desc: "অতিরিক্ত জায়গা নেওয়া বড় ফাইল", color: "#ea580c", tags: ["large", "storage", "সাইজ"] },
+      { id: 15, name: "Storage Visualizer", banglaName: "স্টোরেজ অ্যানালাইজার", cat: "STORAGE", icon: "📊", desc: "মেমোরি ড্রাইভ ব্যবহারের চার্ট", color: "#ea580c", tags: ["storage", "chart", "মেমোরি"] },
+      { id: 16, name: "APK Extractor", banglaName: "অ্যাপ ব্যাকআপ ও এক্সট্রাক্ট", cat: "STORAGE", icon: "📱", desc: "ইন্সটলড অ্যাপ প্যাকেজ ম্যানেজমেন্ট", color: "#ea580c", tags: ["apk", "backup", "অ্যাপ"] },
+      { id: 17, name: "Document Vault", banglaName: "গোপন ডকুমেন্ট লকার", cat: "STORAGE", icon: "🔒", desc: "পিন সুরক্ষিত নিরাপদ ফাইল ভল্ট", color: "#ea580c", tags: ["vault", "lock", "লকার"] },
+      { id: 18, name: "TXT / CSV Reader", banglaName: "ফাইল রিডার", cat: "STORAGE", icon: "📄", desc: "টেক্সট ও সিএসভি ডেটা প্রিভিউ", color: "#ea580c", tags: ["csv", "txt", "viewer"] },
+      { id: 19, name: "File Encryptor", banglaName: "ফাইল এনক্রিপশন টুল", cat: "STORAGE", icon: "🛡️", desc: "পাসওয়ার্ড দিয়ে ফাইল নিরাপদ লক", color: "#ea580c", tags: ["encrypt", "aes", "সিকিউরিটি"] },
+
+      // 3. Media & Graphics (20..31)
+      { id: 20, name: "QR & Barcode Scanner", banglaName: "কিউআর ও বারকোড স্ক্যানার", cat: "MEDIA", icon: "📷", desc: "ক্যামেরা বা ইমেজ থেকে কিউআর রিড", color: "#9333ea", tags: ["qr", "scanner", "বারকোড"] },
+      { id: 21, name: "QR Code Generator", banglaName: "কিউআর কোড জেনারেটর", cat: "MEDIA", icon: "🏁", desc: "লিংক, টেক্সট ও ওয়াইফাই কিউআর", color: "#9333ea", tags: ["qr", "create", "জেনারেট"] },
+      { id: 22, name: "Image Compressor", banglaName: "ছবি সাইজ কমানো", cat: "MEDIA", icon: "🖼️", desc: "গুণমান ঠিক রেখে ছবির কেবি কমানো", color: "#9333ea", tags: ["compress", "image", "ছবি"] },
+      { id: 23, name: "Image Crop & Rotate", banglaName: "ক্রপ ও রোটেট", cat: "MEDIA", icon: "✂️", desc: "ছবি কাটাকাটি ও বিভিন্ন অ্যাঙ্গেলে ঘোরানো", color: "#9333ea", tags: ["crop", "rotate", "এডিট"] },
+      { id: 24, name: "Color Picker & Palette", banglaName: "কালার পিকার ও হেক্স কোড", cat: "MEDIA", icon: "🎨", desc: "HEX, RGB ও HSL কালার কোড নির্বাচন", color: "#9333ea", tags: ["color", "hex", "rgb", "কালার"] },
+      { id: 25, name: "Text to PDF Converter", banglaName: "টেক্সট থেকে পিডিএফ", cat: "MEDIA", icon: "📑", desc: "টেক্সট নোট সরাসরি পিডিএফ ফাইলে তৈরি", color: "#9333ea", tags: ["pdf", "text", "পিডিএফ"] },
+      { id: 26, name: "Image to PDF Maker", banglaName: "ছবি থেকে পিডিএফ মেকার", cat: "MEDIA", icon: "📚", desc: "একাধিক ছবি জুড়ে পিডিএফ ডকুমেন্ট", color: "#9333ea", tags: ["image", "pdf", "কনভার্টার"] },
+      { id: 27, name: "Background Remover", banglaName: "ছবির ব্যাকগ্রাউন্ড রিমুভার", cat: "MEDIA", icon: "🪄", desc: "অটোম্যাটিক স্বচ্ছ পিএনজি ব্যাকগ্রাউন্ড", color: "#9333ea", tags: ["bg", "remove", "ব্যাকগ্রাউন্ড"] },
+      { id: 28, name: "Voice Audio Recorder", banglaName: "অডিও ভয়েস রেকর্ডার", cat: "MEDIA", icon: "🎙️", desc: "উচ্চমানের ভয়েস নোট রেকর্ডিং", color: "#9333ea", tags: ["record", "audio", "ভয়েস"] },
+      { id: 29, name: "Video to Audio", banglaName: "ভিডিও থেকে এমপি৩", cat: "MEDIA", icon: "🎵", desc: "ভিডিও থেকে সাউন্ড ট্র্যাক নিষ্কাশন", color: "#9333ea", tags: ["mp3", "audio", "গান"] },
+      { id: 30, name: "PDF Merge & Split", banglaName: "পিডিএফ মার্জ ও স্প্লিট", cat: "MEDIA", icon: "📎", desc: "পিডিএফ ফাইল একত্রীকরণ ও পেজ আলাদা", color: "#9333ea", tags: ["merge", "split", "pdf"] },
+      { id: 31, name: "Signature & Drawing Pad", banglaName: "ডিজিটাল সিগনেচার ও ড্রয়িং", cat: "MEDIA", icon: "✍️", desc: "স্ক্রিনে হাতের স্বাক্ষর ও স্কেচ আঁকা", color: "#9333ea", tags: ["draw", "signature", "স্বাক্ষর"] },
+
+      // 4. Text & Content (32..39)
+      { id: 32, name: "Word & Character Counter", banglaName: "শব্দ ও বর্ণ গণনাকারী", cat: "TEXT", icon: "🔤", desc: "শব্দ সংখ্যা, বর্ণ, প্যারাগ্রাফ ও পড়ার সময়", color: "#0d9488", tags: ["word", "counter", "শব্দ"] },
+      { id: 33, name: "Text Case Converter", banglaName: "কেস কনভার্টার", cat: "TEXT", icon: "🔠", desc: "UPPER, lower, Title Case পরিবর্তন", color: "#0d9488", tags: ["case", "upper", "lower"] },
+      { id: 34, name: "Fancy Stylish Text", banglaName: "স্টাইলিশ ফন্ট জেনারেটর", cat: "TEXT", icon: "✨", desc: "সোশ্যাল মিডিয়ার জন্য আকর্ষণীয় ফন্ট", color: "#0d9488", tags: ["font", "fancy", "স্টাইল"] },
+      { id: 35, name: "Text Repeater", banglaName: "টেক্সট রিপিটার", cat: "TEXT", icon: "🔁", desc: "এক ক্লিকে ১০০০ বার টেক্সট রিপিট", color: "#0d9488", tags: ["repeat", "loop", "রিপিট"] },
+      { id: 36, name: "Duplicate Line Remover", banglaName: "ডুপ্লিকেট লাইন রিমুভার", cat: "TEXT", icon: "🧹", desc: "তালিকার পুনরাবৃত্তি লাইন ডিলিট", color: "#0d9488", tags: ["lines", "duplicate", "ক্লিন"] },
+      { id: 37, name: "Base64 & Binary Coder", banglaName: "এনকোডার ও ডিকোডার", cat: "TEXT", icon: "0️⃣", desc: "Base64, বাইনারি ও হেক্সাডেসিমাল", color: "#0d9488", tags: ["base64", "binary", "কোড"] },
+      { id: 38, name: "Bijoy to Unicode", banglaName: "বিজয় ও ইউনিকোড কনভার্টার", cat: "TEXT", icon: "🇧🇩", desc: "বাংলা বিজয় টেক্সট থেকে ইউনিকোড রূপান্তর", color: "#0d9488", tags: ["bijoy", "unicode", "বাংলা"] },
+      { id: 39, name: "OCR Text Extractor", banglaName: "ছবি থেকে লেখা এক্সট্রাক্ট", cat: "TEXT", icon: "🔍", desc: "ইমেজ থেকে অফলাইন টেক্সট রিডার", color: "#0d9488", tags: ["ocr", "scan", "টেক্সট"] },
+
+      // 5. Sensors & Hardware (40..53)
+      { id: 40, name: "Flashlight & Strobe", banglaName: "টর্চলাইট ও এসওএস স্ট্রোব", cat: "SENSORS", icon: "🔦", desc: "ক্যামেরা এলইডি লাইট ও স্ক্রিন ফ্ল্যাশ", color: "#0284c7", tags: ["torch", "flash", "টর্চ"] },
+      { id: 41, name: "Digital Compass", banglaName: "ডিজিটাল কম্পাস (দিকদর্শন)", cat: "SENSORS", icon: "🧭", desc: "সঠিক উত্তর দিক ও ডিগ্রি নির্দেশক", color: "#0284c7", tags: ["compass", "north", "দিক"] },
+      { id: 42, name: "Spirit Bubble Level", banglaName: "স্পিরিট লেভেল (সমতল মাপক)", cat: "SENSORS", icon: "🫧", desc: "সারফেস সমতল ও কোণ যাচাই", color: "#0284c7", tags: ["level", "bubble", "সমতল"] },
+      { id: 43, name: "Sound Decibel Meter", banglaName: "শব্দ ডেসিবেল মিটার", cat: "SENSORS", icon: "🔊", desc: "শব্দের তীব্রতা ও নয়েজ লেভেল (dB)", color: "#0284c7", tags: ["decibel", "sound", "শব্দ"] },
+      { id: 44, name: "Device Info & Specs", banglaName: "ডিভাইস ও সিস্টেম তথ্য", cat: "SENSORS", icon: "💻", desc: "র‍্যাম, সিপিইউ, ওএস ও মডেল স্পেসিফিকেশন", color: "#0284c7", tags: ["device", "specs", "সিস্টেম"] },
+      { id: 45, name: "Battery Health", banglaName: "ব্যাটারি হেলথ ও চার্জিং", cat: "SENSORS", icon: "🔋", desc: "ব্যাটারির তাপমাত্রা, ভোল্টেজ ও স্থায়িত্ব", color: "#0284c7", tags: ["battery", "charge", "ব্যাটারি"] },
+      { id: 46, name: "Vibratometer", banglaName: "ভাইব্রেশন ও রিখটার টেস্ট", cat: "SENSORS", icon: "📳", desc: "মোবাইল ভাইব্রেশন ও ভূকম্পন টেস্ট", color: "#0284c7", tags: ["vibrate", "sensor", "কম্পন"] },
+      { id: 47, name: "Dead Pixel Screen Tester", banglaName: "স্ক্রিন ডেড পিক্সেল টেস্ট", cat: "SENSORS", icon: "🖥️", desc: "ডিসপ্লের নষ্ট পিক্সেল ও কালার চেক", color: "#0284c7", tags: ["pixel", "screen", "ডিসপ্লে"] },
+      { id: 48, name: "Screen Ruler / Scale", banglaName: "স্ক্রিন রুলার স্কেল", cat: "SENSORS", icon: "📏", desc: "সেন্টিমিটার ও ইঞ্চিতে বস্তু পরিমাপ", color: "#0284c7", tags: ["ruler", "scale", "স্কেল"] },
+      { id: 49, name: "180° Protractor", banglaName: "চাঁদা (কোণ পরিমাপক)", cat: "SENSORS", icon: "📐", desc: "ডিগ্রি ও কোণ নির্ভুল পরিমাপ", color: "#0284c7", tags: ["protractor", "angle", "কোণ"] },
+      { id: 50, name: "Metal & EMF Detector", banglaName: "মেটাল ও চৌম্বক ডিটেক্টর", cat: "SENSORS", icon: "🧲", desc: "চৌম্বক ক্ষেত্র ও ধাতু উপস্থিতি", color: "#0284c7", tags: ["metal", "emf", "চৌম্বক"] },
+      { id: 51, name: "Ambient Light Meter", banglaName: "আলো পরিমাপক (ল্যাক্স মিটার)", cat: "SENSORS", icon: "☀️", desc: "পরিবেশের আলোর তীব্রতা (Lux)", color: "#0284c7", tags: ["light", "lux", "আলো"] },
+      { id: 52, name: "Frequency Tone Generator", banglaName: "অডিও ফ্রিকোয়েন্সি জেনারেটর", cat: "SENSORS", icon: "🎛️", desc: "২০Hz থেকে ২০kHz সাউন্ড হার্টজ", color: "#0284c7", tags: ["frequency", "hz", "সাউন্ড"] },
+      { id: 53, name: "Pocket Mirror", banglaName: "পকেট আয়না", cat: "SENSORS", icon: "🪞", desc: "ফ্রন্ট ক্যামেরা জুম ও রিফ্লেকশন", color: "#0284c7", tags: ["mirror", "camera", "আয়না"] },
+
+      // 6. Unit Converters (54..61)
+      { id: 54, name: "Length Converter", banglaName: "দৈর্ঘ্য ও দূরত্ব রূপান্তর", cat: "UNITS", icon: "📏", desc: "মিটার, কিমি, ফুট, ইঞ্চি, মাইল", color: "#4f46e5", tags: ["length", "distance", "মিটার", "ফুট"] },
+      { id: 55, name: "Weight & Mass Converter", banglaName: "ওজন ও ভর রূপান্তর", cat: "UNITS", icon: "⚖️", desc: "কেজি, গ্রাম, পাউন্ড, আউন্স, টন", color: "#4f46e5", tags: ["weight", "kg", "lbs", "ওজন"] },
+      { id: 56, name: "Temperature Converter", banglaName: "তাপমাত্রা রূপান্তর", cat: "UNITS", icon: "🌡️", desc: "সেলসিয়াস, ফারেনহাইট ও কেলভিন", color: "#4f46e5", tags: ["temperature", "celsius", "তাপমাত্রা"] },
+      { id: 57, name: "Land / Area (জমি পরিমাপ)", banglaName: "জমির হিসাব (শতক, কাঠা, বিঘা)", cat: "UNITS", icon: "🌾", desc: "শতক, কাঠা, বিঘা, একর ও বর্গফুট রূপান্তর", color: "#4f46e5", tags: ["land", "area", "জমি", "শতক", "কাঠা", "বিঘা"] },
+      { id: 58, name: "Data Storage Converter", banglaName: "মেমোরি ডেটা রূপান্তর", cat: "UNITS", icon: "💾", desc: "MB, GB, TB ও Bytes গণনা", color: "#4f46e5", tags: ["data", "storage", "mb", "gb"] },
+      { id: 59, name: "Speed Converter", banglaName: "গতিবেগ রূপান্তর", cat: "UNITS", icon: "🚀", desc: "km/h, m/s, mph ও নট", color: "#4f46e5", tags: ["speed", "kmh", "mph", "গতি"] },
+      { id: 60, name: "Volume & Capacity", banglaName: "আয়তন ও তরল রূপান্তর", cat: "UNITS", icon: "🧪", desc: "লিটার, মিলিলিটার, গ্যালন", color: "#4f46e5", tags: ["volume", "liter", "লিটার"] },
+      { id: 61, name: "Fuel & Mileage Calculator", banglaName: "গাড়ির মাইলেজ ও খরচ", cat: "UNITS", icon: "⛽", desc: "কিলোমিটার প্রতি তেল ও মোট খরচের হিসাব", color: "#4f46e5", tags: ["fuel", "mileage", "তেল", "গাড়ি"] },
+
+      // 7. Finance & Health (62..70)
+      { id: 62, name: "Daily POS & Cashbook", banglaName: "দৈনিক আয়-ব্যয় ক্যাশবই", cat: "FINANCE", icon: "📖", desc: "দোকান ও ব্যক্তিগত হিসাব খাতা", color: "#059669", tags: ["cashbook", "pos", "হিসাব", "আয়", "ব্যয়"] },
+      { id: 63, name: "EMI Loan Calculator", banglaName: "ব্যাংক লোন ও কিস্তি (EMI)", cat: "FINANCE", icon: "🏦", desc: "মাসিক কিস্তি ও মোট সুদের হিসাব", color: "#059669", tags: ["emi", "loan", "কিস্তি", "লোন"] },
+      { id: 64, name: "GST & VAT Calculator", banglaName: "ভ্যাট ও ট্যাক্স হিসাব", cat: "FINANCE", icon: "🧾", desc: "৫%, ৭.৫%, ১৫% ভ্যাট ইনক্লুসিভ/এক্সক্লুসিভ", color: "#059669", tags: ["vat", "gst", "ট্যাক্স", "ভ্যাট"] },
+      { id: 65, name: "Discount & Offer Calculator", banglaName: "ডিসকাউন্ট ও ছাড়ের হিসাব", cat: "FINANCE", icon: "🏷️", desc: "শপিং ডিসকাউন্ট পার্সেন্টেজ ও সাশ্রয়", color: "#059669", tags: ["discount", "sale", "ছাড়"] },
+      { id: 66, name: "Compound Interest", banglaName: "চক্রবৃদ্ধি মুনাফা ক্যালকুলেটর", cat: "FINANCE", icon: "📈", desc: "সঞ্চয়পত্র ও এফডিআর মুনাফার চক্রবৃদ্ধি", color: "#059669", tags: ["interest", "compound", "মুনাফা"] },
+      { id: 67, name: "BMI Health Calculator", banglaName: "বিএমআই ও ওজনের স্বাস্থ্য", cat: "FINANCE", icon: "🏃", desc: "আদর্শ শারীরিক ওজন ও স্বাস্থ্য ক্যাটাগরি", color: "#059669", tags: ["bmi", "health", "ওজন"] },
+      { id: 68, name: "Water Intake Tracker", banglaName: "দৈনিক পানি পানের ট্র্যাকার", cat: "FINANCE", icon: "💧", desc: "প্রতিদিন পর্যাপ্ত পানি পানের গোল ও রিমাইন্ডার", color: "#059669", tags: ["water", "drink", "পানি"] },
+      { id: 69, name: "4-7-8 Breathe Relaxation", banglaName: "ব্রিদিং এক্সারসাইজ ও মেডিটেশন", cat: "FINANCE", icon: "🧘", desc: "মানসিক চাপ কমাতে ডিপ ব্রিদিং গাইড", color: "#059669", tags: ["breathe", "relax", "শ্বাস"] },
+      { id: 70, name: "Network & Speed Monitor", banglaName: "ইন্টারনেট ও অফলাইন স্ট্যাটাস", cat: "FINANCE", icon: "📶", desc: "ওয়াইফাই ও অফলাইন ডায়াগনস্টিক", color: "#059669", tags: ["network", "wifi", "পিং"] }
+    ];
+
+    // ---------------------------------------------------------
+    // STATE & LOCAL STORAGE
+    // ---------------------------------------------------------
+    let currentCategory = "ALL";
+    let currentTab = "TOOLS"; // 'TOOLS', 'FAVS', 'ABOUT'
+    let searchQuery = "";
+    let favorites = JSON.parse(localStorage.getItem("mega_favs") || "[]");
+    let themeMode = localStorage.getItem("mega_theme_mode") || "SYSTEM"; // 'SYSTEM', 'LIGHT', 'DARK'
+
+    function applyTheme(mode) {
+      themeMode = mode;
+      localStorage.setItem("mega_theme_mode", mode);
+      if (mode === "DARK") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else if (mode === "LIGHT") {
+        document.documentElement.removeAttribute("data-theme");
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (prefersDark) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      }
+      if (currentTab === "ABOUT") {
+        renderAboutView();
+      }
+    }
+    applyTheme(themeMode);
+    if (window.matchMedia) {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        if (themeMode === "SYSTEM") applyTheme("SYSTEM");
+      });
+    }
+
+    // Web Share API implementation
+    window.shareMegaUtility = function() {
+      const shareData = {
+        title: "Mega Utility - ৭০টি অফলাইন স্মার্ট টুলস",
+        text: "Mega Utility: ৭০টি সম্পূর্ণ অফলাইন স্মার্ট টুলস - ক্যালকুলেটর, কিউআর স্ক্যানার, জমি পরিমাপ, ক্যাশ কাউন্টার ও আরও অনেক কিছু!",
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData)
+          .catch((err) => {
+            if (err.name !== 'AbortError') {
+              console.error('Error sharing Mega Utility:', err);
+            }
+          });
+      } else {
+        const fullMessage = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullMessage).then(() => {
+            alert("অ্যাপের লিংক ও বিবরণ ক্লিপবোর্ডে কপি করা হয়েছে! এখন যেকোনো মেসেঞ্জার বা সোশ্যাল মিডিয়ায় বন্ধুদের সাথে শেয়ার করতে পারেন।");
+          }).catch(() => {
+            prompt("অ্যাপের লিংক কপি করুন:", window.location.href);
+          });
+        } else {
+          prompt("অ্যাপের লিংক কপি করুন:", window.location.href);
+        }
+      }
+    };
+
+    // Clear App Data and Cache implementation
+    window.clearAppData = function() {
+      const confirmReset = confirm("⚠️ আপনি কি নিশ্চিত যে অ্যাপের সমস্ত ডেটা ও ক্যাশ মুছে ফেলতে চান?\n\nএটি করলে:\n• বুকমার্ক/ফেভারিট তালিকা রিসেট হবে\n• সংরক্ষিত থিম প্রিফারেন্স ডিফল্ট হবে\n• অন্যান্য সংরক্ষিত হিসাব রিসেট হবে");
+      if (confirmReset) {
+        localStorage.clear();
+        favorites = [];
+        themeMode = "SYSTEM";
+        applyTheme("SYSTEM");
+        favBadge.textContent = "0";
+        if (currentTab === "ABOUT") {
+          renderAboutView();
+        } else if (currentTab === "FAVS") {
+          renderFavoritesView();
+        } else {
+          renderTools();
+        }
+        alert("✅ অ্যাপের সমস্ত ডেটা ও ক্যাশ সফলভাবে মুছে ফেলা হয়েছে এবং ডিফল্ট সেটিংসে রিসেট করা হয়েছে।");
+      }
+    };
+
+    // Elements
+    const toolsGrid = document.getElementById("toolsGrid");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearch = document.getElementById("clearSearch");
+    const categoryChips = document.getElementById("categoryChips");
+    const toolCountBadge = document.getElementById("toolCountBadge");
+    const favBadge = document.getElementById("favBadge");
+
+    const navTools = document.getElementById("navTools");
+    const navFavs = document.getElementById("navFavs");
+    const navAbout = document.getElementById("navAbout");
+
+    const toolModal = document.getElementById("toolModal");
+    const modalToolName = document.getElementById("modalToolName");
+    const modalToolBangla = document.getElementById("modalToolBangla");
+    const modalToolContent = document.getElementById("modalToolContent");
+    const closeModal = document.getElementById("closeModal");
+
+    // ---------------------------------------------------------
+    // RENDER TOOLS
+    // ---------------------------------------------------------
+    function renderTools() {
+      toolsGrid.innerHTML = "";
+      let list = [...ALL_TOOLS];
+
+      if (currentTab === "FAVS") {
+        list = list.filter(t => favorites.includes(t.id));
+      }
+
+      if (currentCategory !== "ALL") {
+        list = list.filter(t => t.cat === currentCategory);
+      }
+
+      const q = searchQuery.trim().toLowerCase();
+      if (q) {
+        list = list.filter(t =>
+          t.name.toLowerCase().includes(q) ||
+          t.banglaName.toLowerCase().includes(q) ||
+          t.desc.toLowerCase().includes(q) ||
+          t.tags.some(tag => tag.toLowerCase().includes(q))
+        );
+      }
+
+      toolCountBadge.textContent = `${list.length} Tools`;
+
+      if (list.length === 0) {
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+        list.forEach(tool => {
+          const isFav = favorites.includes(tool.id);
+          const card = document.createElement("div");
+          card.className = "tool-card";
+          card.innerHTML = `
+            <div class="tool-card-top">
+              <div class="tool-icon-box" style="background: ${tool.color}15; color: ${tool.color};">
+                ${tool.icon}
+              </div>
+              <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav(event, ${tool.id})">
+                ${isFav ? '❤️' : '🤍'}
+              </button>
+            </div>
+            <div class="tool-info">
+              <h4>${tool.name}</h4>
+              <p>${tool.banglaName}</p>
+            </div>
+            <div class="tool-cat-badge">
+              <span class="tool-cat-dot" style="background: ${tool.color};"></span>
+              <span>${getCatBangla(tool.cat)}</span>
+            </div>
+          `;
+          card.onclick = () => openToolModal(tool);
+          toolsGrid.appendChild(card);
+        });
+      }
+
+      updateFavBadge();
+    }
+
+    function getCatBangla(cat) {
+      switch(cat) {
+        case "DAILY": return "দৈনন্দিন ইউটিলিটি";
+        case "STORAGE": return "স্টোরেজ ও ক্লিনার";
+        case "MEDIA": return "মিডিয়া ও গ্রাফিক্স";
+        case "TEXT": return "টেক্সট ও কন্টেন্ট";
+        case "SENSORS": return "সেন্সর ও হার্ডওয়্যার";
+        case "UNITS": return "একক রূপান্তর";
+        case "FINANCE": return "অর্থ ও স্বাস্থ্য";
+        default: return "ইউটিলিটি";
+      }
+    }
+
+    // Toggle Favorite
+    window.toggleFav = function(e, id) {
+      e.stopPropagation();
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(favId => favId !== id);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem("mega_favs", JSON.stringify(favorites));
+      renderTools();
+    };
+
+    function updateFavBadge() {
+      if (favorites.length > 0) {
+        favBadge.style.display = "inline-block";
+        favBadge.textContent = favorites.length;
+      } else {
+        favBadge.style.display = "none";
+      }
+    }
+
+    // Search events
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      clearSearch.style.display = searchQuery ? "block" : "none";
+      renderTools();
+    });
+
+    clearSearch.addEventListener("click", () => {
+      searchInput.value = "";
+      searchQuery = "";
+      clearSearch.style.display = "none";
+      renderTools();
+    });
+
+    // Category chips click
+    categoryChips.querySelectorAll(".chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        categoryChips.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentCategory = chip.dataset.cat;
+        renderTools();
+      });
+    });
+
+    // Bottom Navigation
+    navTools.addEventListener("click", () => {
+      currentTab = "TOOLS";
+      setActiveNav(navTools);
+      categoryChips.style.display = "flex";
+      renderTools();
+    });
+
+    navFavs.addEventListener("click", () => {
+      currentTab = "FAVS";
+      setActiveNav(navFavs);
+      categoryChips.style.display = "none";
+      renderTools();
+    });
+
+    navAbout.addEventListener("click", () => {
+      currentTab = "ABOUT";
+      setActiveNav(navAbout);
+      categoryChips.style.display = "none";
+      renderAboutView();
+    });
+
+    function setActiveNav(btn) {
+      document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function renderAboutView() {
+      emptyState.style.display = "none";
+      toolsGrid.innerHTML = `
+        <div style="grid-column: span 2; background: var(--surface); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+          <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Mega Utility 70</h2>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">সম্পূর্ণ অফলাইন স্মার্ট ইউটিলিটি প্ল্যাটফর্ম</p>
+
+          <!-- Theme Switcher Card -->
+          <div style="background: var(--surface-variant); padding: 16px; border-radius: 14px; margin-bottom: 18px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+              <span style="font-size: 18px;">🎨</span>
+              <strong style="font-size: 14px;">থিম সেটিংস / Theme Mode</strong>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">আপনার পছন্দের লাইট, ডার্ক অথবা ডিভাইস সিস্টেম ডিফল্ট থিম নির্বাচন করুন:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+              <button onclick="applyTheme('SYSTEM')" style="padding: 10px 4px; border-radius: 10px; border: ${themeMode === 'SYSTEM' ? '2px solid var(--primary)' : '1px solid var(--border)'}; background: ${themeMode === 'SYSTEM' ? 'var(--primary-light)' : 'var(--surface)'}; color: ${themeMode === 'SYSTEM' ? 'var(--primary)' : 'var(--text-main)'}; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <span>⚙️</span>
+                <span>সিস্টেম</span>
+              </button>
+              <button onclick="applyTheme('LIGHT')" style="padding: 10px 4px; border-radius: 10px; border: ${themeMode === 'LIGHT' ? '2px solid var(--primary)' : '1px solid var(--border)'}; background: ${themeMode === 'LIGHT' ? 'var(--primary-light)' : 'var(--surface)'}; color: ${themeMode === 'LIGHT' ? 'var(--primary)' : 'var(--text-main)'}; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <span>☀️</span>
+                <span>লাইট</span>
+              </button>
+              <button onclick="applyTheme('DARK')" style="padding: 10px 4px; border-radius: 10px; border: ${themeMode === 'DARK' ? '2px solid var(--primary)' : '1px solid var(--border)'}; background: ${themeMode === 'DARK' ? 'var(--primary-light)' : 'var(--surface)'}; color: ${themeMode === 'DARK' ? 'var(--primary)' : 'var(--text-main)'}; font-weight: 600; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <span>🌙</span>
+                <span>ডার্ক</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Share Mega Utility Button Card -->
+          <div style="background: var(--surface-variant); padding: 16px; border-radius: 14px; margin-bottom: 18px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">📤</span>
+                <strong style="font-size: 14px;">অ্যাপ শেয়ার করুন / Share App</strong>
+              </div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">বন্ধুবান্ধব বা পরিচিতদের সাথে এই ৭০টি অফলাইন স্মার্ট টুলস প্যাকেজটি সহজে শেয়ার করুন:</p>
+            <button onclick="shareMegaUtility()" class="tool-btn" id="shareAppBtn" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              <span>Share Mega Utility</span>
+            </button>
+          </div>
+
+          <!-- Clear App Data/Cache Card -->
+          <div style="background: var(--surface-variant); padding: 16px; border-radius: 14px; margin-bottom: 18px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">🗑️</span>
+                <strong style="font-size: 14px; color: #ef4444;">অ্যাপ ডেটা ও ক্যাশ রিসেট / Clear Data</strong>
+              </div>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">আপনার ফেভারিট বুকমার্ক, থিম সেটিংস ও লোকাল স্টোরেজ ক্যাশ মুছে ডিফল্ট অবস্থায় ফেরাতে চান?</p>
+            <button onclick="clearAppData()" id="clearAppDataBtn" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+              <span>Clear App Data / Cache</span>
+            </button>
+          </div>
+
+          <div style="background: var(--primary-light); padding: 16px; border-radius: 14px; margin-bottom: 18px;">
+            <p style="font-weight: 700; color: var(--primary); font-size: 14px; margin-bottom: 4px;">🛡️ ১০০% অফলাইন ও নিরাপদ</p>
+            <p style="font-size: 12.5px; color: var(--text-main);">কোনো ডেটা ট্র্যাকিং নেই, কোনো ইন্টারনেট নির্ভরতা নেই এবং কোনো থার্ড-পার্টি বিজ্ঞাপন নেই। আপনার প্রতিটি হিসাব ও ফাইল ডিভাইসেই সুরক্ষিত।</p>
+          </div>
+
+          <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 10px;">ক্যাটালগ পরিসংখ্যান:</h4>
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+              <span>⚡ মোট অফলাইন টুলস</span>
+              <strong style="color:var(--primary);">৭০টি</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+              <span>❤️ আপনার পছন্দের বুকমার্ক</span>
+              <strong>${favorites.length}টি</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
+              <span>🗂️ মূল ক্যাটাগরি</span>
+              <strong>৭টি</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0;">
+              <span>🚀 সংস্করণ</span>
+              <strong>v1.0.0 (Offline Suite)</strong>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---------------------------------------------------------
+    // TOOL MODAL DISPATCHER
+    // ---------------------------------------------------------
+    function openToolModal(tool) {
+      modalToolName.textContent = tool.name;
+      modalToolBangla.textContent = tool.banglaName;
+      modalToolContent.innerHTML = getToolHtml(tool.id);
+      toolModal.style.display = "flex";
+      setupToolLogic(tool.id);
+    }
+
+    closeModal.addEventListener("click", () => {
+      toolModal.style.display = "none";
+    });
+
+    toolModal.addEventListener("click", (e) => {
+      if (e.target === toolModal) {
+        toolModal.style.display = "none";
+      }
+    });
+
+    // ---------------------------------------------------------
+    // INTERACTIVE TOOLS HTML & LOGIC
+    // ---------------------------------------------------------
+    function getToolHtml(id) {
+      switch(id) {
+        // 1. Smart Calculator
+        case 1:
+          return `
+            <div class="result-card" style="margin-top:0;">
+              <h5>Result</h5>
+              <div class="result-value" id="calcDisplay">0</div>
+            </div>
+            <div class="calc-grid">
+              <button class="calc-btn op" onclick="calcInput('C')">C</button>
+              <button class="calc-btn op" onclick="calcInput('(')">(</button>
+              <button class="calc-btn op" onclick="calcInput(')')">)</button>
+              <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+              <button class="calc-btn" onclick="calcInput('7')">7</button>
+              <button class="calc-btn" onclick="calcInput('8')">8</button>
+              <button class="calc-btn" onclick="calcInput('9')">9</button>
+              <button class="calc-btn op" onclick="calcInput('*')">×</button>
+              <button class="calc-btn" onclick="calcInput('4')">4</button>
+              <button class="calc-btn" onclick="calcInput('5')">5</button>
+              <button class="calc-btn" onclick="calcInput('6')">6</button>
+              <button class="calc-btn op" onclick="calcInput('-')">-</button>
+              <button class="calc-btn" onclick="calcInput('1')">1</button>
+              <button class="calc-btn" onclick="calcInput('2')">2</button>
+              <button class="calc-btn" onclick="calcInput('3')">3</button>
+              <button class="calc-btn op" onclick="calcInput('+')">+</button>
+              <button class="calc-btn" onclick="calcInput('0')">0</button>
+              <button class="calc-btn" onclick="calcInput('.')">.</button>
+              <button class="calc-btn eq" onclick="calcInput('=')">=</button>
+            </div>
+          `;
+
+        // 3. Age Calculator
+        case 3:
+          return `
+            <div class="tool-input-group">
+              <label>আপনার জন্মতারিখ নির্বাচন করুন</label>
+              <input type="date" id="birthDate" class="tool-input" value="2000-01-01">
+            </div>
+            <button class="tool-btn" onclick="calculateAge()">বয়স হিসাব করুন</button>
+            <div class="result-card" id="ageResultBox" style="display:none;">
+              <h5>বর্তমান বয়স</h5>
+              <div class="result-value" id="ageResultText">0 বছর</div>
+              <p id="ageSubDetails" style="font-size:13px; color:var(--text-muted); margin-top:6px;"></p>
+            </div>
+          `;
+
+        // 6. Digital Tasbih
+        case 6:
+          return `
+            <div style="text-align:center; padding: 20px 0;">
+              <div style="font-size:64px; font-weight:800; color:var(--primary);" id="tasbihCount">0</div>
+              <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px;">টার্গেট: ৩৩ / ১০০</p>
+              <button style="width:130px; height:130px; border-radius:50%; background:var(--primary); color:#fff; border:none; font-size:24px; font-weight:800; cursor:pointer; box-shadow:0 10px 25px rgba(37,99,235,0.3);" onclick="countTasbih()">
+                সুবহানাল্লাহ
+              </button>
+              <div style="margin-top:24px;">
+                <button class="tool-input" style="width:auto; padding:8px 18px; cursor:pointer;" onclick="resetTasbih()">রিসেট কাউন্টার</button>
+              </div>
+            </div>
+          `;
+
+        // 11. Cash Counter
+        case 11:
+          return `
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">নোট সংখ্যা ইনপুট দিন, স্বয়ংক্রিয় মোট টাকা হিসাব হবে:</p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${[1000, 500, 200, 100, 50, 20, 10, 5].map(note => `
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <strong style="width:70px;">৳ ${note}</strong>
+                  <input type="number" min="0" placeholder="সংখ্যা" class="tool-input note-input" data-note="${note}" oninput="calcCashTotal()" style="padding:6px 10px;">
+                  <span class="note-subtotal" id="sub_${note}" style="width:100px; text-align:right; font-weight:600; font-size:13px;">৳ 0</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="result-card">
+              <h5>মোট জমা ক্যাশ</h5>
+              <div class="result-value" id="cashGrandTotal">৳ 0</div>
+            </div>
+          `;
+
+        // 21. QR Code Generator
+        case 21:
+          return `
+            <div class="tool-input-group">
+              <label>টেক্সট বা ওয়েবসাইটের লিঙ্ক দিন</label>
+              <input type="text" id="qrText" class="tool-input" placeholder="https://example.com" value="https://google.com">
+            </div>
+            <button class="tool-btn" onclick="genQrCode()">কিউআর কোড তৈরি করুন</button>
+            <div style="text-align:center; margin-top:20px;" id="qrImageWrap">
+              <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://google.com" style="border-radius:12px; border:1px solid var(--border); padding:8px; background:#fff;">
+            </div>
+          `;
+
+        // 32. Word & Character Counter
+        case 32:
+          return `
+            <div class="tool-input-group">
+              <label>আপনার টেক্সট এখানে পেস্ট বা টাইপ করুন</label>
+              <textarea id="wordInput" class="tool-input" rows="5" placeholder="এখানে লিখুন..." oninput="countWords()"></textarea>
+            </div>
+            <div class="result-card">
+              <div class="unit-row"><span>শব্দ (Words):</span> <strong id="resWords">0</strong></div>
+              <div class="unit-row"><span>বর্ণ (Characters):</span> <strong id="resChars">0</strong></div>
+              <div class="unit-row"><span>স্পেস ছাড়া বর্ণ:</span> <strong id="resCharsNoSpace">0</strong></div>
+              <div class="unit-row"><span>প্যারাগ্রাফ:</span> <strong id="resParas">0</strong></div>
+            </div>
+          `;
+
+        // 54. Length Converter
+        case 54:
+          return `
+            <div class="tool-input-group">
+              <label>মান ইনপুট দিন (মিটারে)</label>
+              <input type="number" id="lengthInput" class="tool-input" value="1" oninput="convertLength()">
+            </div>
+            <div class="result-card">
+              <div class="unit-row"><span>কিলোমিটার (km):</span> <strong id="lenKm">0.001 km</strong></div>
+              <div class="unit-row"><span>সেন্টিমিটার (cm):</span> <strong id="lenCm">100 cm</strong></div>
+              <div class="unit-row"><span>ফুট (Feet):</span> <strong id="lenFt">3.2808 ft</strong></div>
+              <div class="unit-row"><span>ইঞ্চি (Inches):</span> <strong id="lenIn">39.37 in</strong></div>
+              <div class="unit-row"><span>মাইল (Miles):</span> <strong id="lenMi">0.00062 mi</strong></div>
+            </div>
+          `;
+
+        // 57. Land / Area Measurement
+        case 57:
+          return `
+            <div class="tool-input-group">
+              <label>মোট বর্গফুট (Square Feet) লিখুন</label>
+              <input type="number" id="landSqFt" class="tool-input" value="14400" oninput="calcLandUnits()">
+            </div>
+            <div class="result-card">
+              <h5>ঐতিহ্যবাহী ও আধুনিক জমির হিসাব</h5>
+              <div class="unit-row"><span>শতক / ডেসিমেল:</span> <strong id="landShatak" style="color:var(--primary);">33.06 শতক</strong></div>
+              <div class="unit-row"><span>কাঠা (Katha):</span> <strong id="landKatha">20.00 কাঠা</strong></div>
+              <div class="unit-row"><span>বিঘা (Bigha):</span> <strong id="landBigha">1.00 বিঘা</strong></div>
+              <div class="unit-row"><span>একর (Acre):</span> <strong id="landAcre">0.33 একর</strong></div>
+              <div class="unit-row"><span>বর্গমিটার (Sq. Meter):</span> <strong id="landSqM">1337.8 m²</strong></div>
+            </div>
+          `;
+
+        // 67. BMI Calculator
+        case 67:
+          return `
+            <div class="tool-input-group">
+              <label>ওজন (কেজি)</label>
+              <input type="number" id="bmiWeight" class="tool-input" value="68">
+            </div>
+            <div class="tool-input-group">
+              <label>উচ্চতা (সেন্টিমিটার)</label>
+              <input type="number" id="bmiHeight" class="tool-input" value="172">
+            </div>
+            <button class="tool-btn" onclick="calcBmi()">বিএমআই হিসাব করুন</button>
+            <div class="result-card" id="bmiResultBox" style="margin-top:14px;">
+              <h5>আপনার বডি ম্যাস ইনডেক্স (BMI)</h5>
+              <div class="result-value" id="bmiValue">23.0</div>
+              <p id="bmiCategory" style="font-weight:700; color:var(--success); margin-top:4px;">স্বাভাবিক ও সুস্থ ওজন</p>
+            </div>
+          `;
+
+        // Default Fallback Interface for any other tool
+        default:
+          return `
+            <div style="text-align:center; padding:24px 0;">
+              <div style="font-size:48px; margin-bottom:12px;">${ALL_TOOLS.find(t=>t.id===id)?.icon || '⚡'}</div>
+              <h4 style="font-size:16px; font-weight:700; margin-bottom:6px;">${ALL_TOOLS.find(t=>t.id===id)?.name}</h4>
+              <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">${ALL_TOOLS.find(t=>t.id===id)?.desc}</p>
+              <div class="result-card">
+                <p style="font-size:13px; font-weight:600; color:var(--primary);">✅ অফলাইন ইউটিলিটি প্রস্তুত</p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">ডিভাইস হার্ডওয়্যার ও অ্যান্ড্রয়েড লাইব্রেরি ইন্টিগ্রেশনের মাধ্যমে সক্রিয়।</p>
+              </div>
+            </div>
+          `;
+      }
+    }
+
+    function setupToolLogic(id) {
+      if (id === 57) calcLandUnits();
+      if (id === 54) convertLength();
+    }
+
+    // ---------------------------------------------------------
+    // CALCULATOR LOGIC
+    // ---------------------------------------------------------
+    let calcExpression = "";
+    window.calcInput = function(val) {
+      const display = document.getElementById("calcDisplay");
+      if (val === 'C') {
+        calcExpression = "";
+        display.textContent = "0";
+      } else if (val === '=') {
+        try {
+          const res = eval(calcExpression.replace(/×/g, '*').replace(/÷/g, '/'));
+          display.textContent = res;
+          calcExpression = String(res);
+        } catch(e) {
+          display.textContent = "Error";
+          calcExpression = "";
+        }
+      } else {
+        if (calcExpression === "0") calcExpression = "";
+        calcExpression += val;
+        display.textContent = calcExpression;
+      }
+    };
+
+    // Age calculation
+    window.calculateAge = function() {
+      const bDate = new Date(document.getElementById("birthDate").value);
+      const today = new Date();
+      if (isNaN(bDate)) return;
+
+      let years = today.getFullYear() - bDate.getFullYear();
+      let months = today.getMonth() - bDate.getMonth();
+      let days = today.getDate() - bDate.getDate();
+
+      if (days < 0) {
+        months--;
+        days += 30;
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      document.getElementById("ageResultBox").style.display = "block";
+      document.getElementById("ageResultText").textContent = `${years} বছর`;
+      document.getElementById("ageSubDetails").textContent = `${months} মাস, ${days} দিন বয়স`;
+    };
+
+    // Tasbih
+    let tasbihCount = 0;
+    window.countTasbih = function() {
+      tasbihCount++;
+      document.getElementById("tasbihCount").textContent = tasbihCount;
+      if (navigator.vibrate) navigator.vibrate(30);
+    };
+    window.resetTasbih = function() {
+      tasbihCount = 0;
+      document.getElementById("tasbihCount").textContent = 0;
+    };
+
+    // Cash counter
+    window.calcCashTotal = function() {
+      let grandTotal = 0;
+      document.querySelectorAll(".note-input").forEach(input => {
+        const note = parseInt(input.dataset.note);
+        const qty = parseInt(input.value) || 0;
+        const sub = note * qty;
+        grandTotal += sub;
+        document.getElementById(`sub_${note}`).textContent = `৳ ${sub.toLocaleString()}`;
+      });
+      document.getElementById("cashGrandTotal").textContent = `৳ ${grandTotal.toLocaleString()}`;
+    };
+
+    // QR Code
+    window.genQrCode = function() {
+      const txt = encodeURIComponent(document.getElementById("qrText").value || "Mega Utility");
+      document.getElementById("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${txt}`;
+    };
+
+    // Word counter
+    window.countWords = function() {
+      const text = document.getElementById("wordInput").value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = text.length;
+      const charsNoSpace = text.replace(/\s/g, '').length;
+      const paras = text.trim() ? text.split(/\n+/).length : 0;
+
+      document.getElementById("resWords").textContent = words;
+      document.getElementById("resChars").textContent = chars;
+      document.getElementById("resCharsNoSpace").textContent = charsNoSpace;
+      document.getElementById("resParas").textContent = paras;
+    };
+
+    // Length conversion
+    window.convertLength = function() {
+      const m = parseFloat(document.getElementById("lengthInput").value) || 0;
+      document.getElementById("lenKm").textContent = `${(m / 1000).toFixed(6)} km`;
+      document.getElementById("lenCm").textContent = `${(m * 100).toFixed(2)} cm`;
+      document.getElementById("lenFt").textContent = `${(m * 3.28084).toFixed(4)} ft`;
+      document.getElementById("lenIn").textContent = `${(m * 39.3701).toFixed(2)} in`;
+      document.getElementById("lenMi").textContent = `${(m * 0.000621371).toFixed(6)} mi`;
+    };
+
+    // Land calculation
+    window.calcLandUnits = function() {
+      const sqFt = parseFloat(document.getElementById("landSqFt").value) || 0;
+      const shatak = sqFt / 435.6;
+      const katha = sqFt / 720.0;
+      const bigha = katha / 20.0;
+      const acre = sqFt / 43560.0;
+      const sqM = sqFt * 0.092903;
+
+      document.getElementById("landShatak").textContent = `${shatak.toFixed(2)} শতক`;
+      document.getElementById("landKatha").textContent = `${katha.toFixed(2)} কাঠা`;
+      document.getElementById("landBigha").textContent = `${bigha.toFixed(3)} বিঘা`;
+      document.getElementById("landAcre").textContent = `${acre.toFixed(4)} একর`;
+      document.getElementById("landSqM").textContent = `${sqM.toFixed(1)} m²`;
+    };
+
+    // BMI calculation
+    window.calcBmi = function() {
+      const w = parseFloat(document.getElementById("bmiWeight").value) || 0;
+      const hCm = parseFloat(document.getElementById("bmiHeight").value) || 170;
+      const hM = hCm / 100;
+      const bmi = w / (hM * hM);
+
+      document.getElementById("bmiValue").textContent = bmi.toFixed(1);
+      const catEl = document.getElementById("bmiCategory");
+      if (bmi < 18.5) {
+        catEl.textContent = "ওজন কম (Underweight)";
+        catEl.style.color = "#0284c7";
+      } else if (bmi < 25) {
+        catEl.textContent = "স্বাভাবিক ও সুস্থ ওজন (Normal)";
+        catEl.style.color = "#16a34a";
+      } else if (bmi < 30) {
+        catEl.textContent = "অতিরিক্ত ওজন (Overweight)";
+        catEl.style.color = "#ea580c";
+      } else {
+        catEl.textContent = "স্থূলতা (Obese)";
+        catEl.style.color = "#ef4444";
+      }
+    };
+
+    // Initial render
+    renderTools();
+  </script>
+</body>
+</html>

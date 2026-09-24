@@ -1,0 +1,6 @@
+{
+  "name": "Mega Utility",
+  "description": "Complete offline suite of 70 utilities across 7 categories: daily tools, storage cleaner, media, text, hardware sensors, unit converters, finance & health.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
