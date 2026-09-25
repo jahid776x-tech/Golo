@@ -800,6 +800,11 @@
       if (confirmReset) {
         localStorage.clear();
         favorites = [];
+        quickNotes = [
+          { id: 1, text: "বাজারের প্রয়োজনীয় তালিকা চেক করুন", done: false },
+          { id: 2, text: "মেগা ইউটিলিটি অফলাইন ফিচারসমূহ পর্যালোচনা", done: true },
+          { id: 3, text: "দৈনিক কাজের লক্ষ্য ও হিসাব সম্পন্ন করুন", done: false }
+        ];
         themeMode = "SYSTEM";
         applyTheme("SYSTEM");
         favBadge.textContent = "0";
@@ -1149,6 +1154,41 @@
             </div>
           `;
 
+        // 5. Quick Notes & To-Do
+        case 5:
+          return `
+            <div class="tool-input-group" style="margin-bottom: 10px;">
+              <label>নতুন নোট বা টু-ডু আইটেম লিখুন</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="quickNoteInput" class="tool-input" placeholder="নোট টাইপ করুন..." onkeydown="if(event.key==='Enter') addQuickNote()">
+                <button class="tool-btn" style="width:auto; padding:0 16px; white-space:nowrap;" onclick="addQuickNote()">+ যোগ করুন</button>
+              </div>
+            </div>
+
+            <!-- Search Bar inside Quick Notes modal -->
+            <div style="position:relative; margin-bottom: 12px;">
+              <input type="text" id="quickNoteSearchInput" class="tool-input" placeholder="🔍 নোট খুঁজুন (Search notes in real-time)..." oninput="handleQuickNoteSearch(this.value)" style="padding-left:36px; padding-right:32px; font-size:13px; height:40px;">
+              <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:0.6; pointer-events:none;">🔍</span>
+              <button id="clearNoteSearchBtn" onclick="clearQuickNoteSearch()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; display:none; padding:4px;" title="সার্চ মুছুন">✕</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 8px 0 8px 0;">
+              <span style="font-size:12.5px; font-weight:700; color:var(--text-main);" id="notesCountLabel">নোট তালিকা</span>
+              <button onclick="downloadNotesAsText()" id="downloadNotesBtn" style="width:auto; padding:7px 12px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px; background:var(--primary-light); color:var(--primary); border:1px solid var(--primary); border-radius:10px; cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download as Text (.txt)</span>
+              </button>
+            </div>
+
+            <div id="notesListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; margin-bottom:12px;">
+              <!-- Dynamic Notes Items -->
+            </div>
+          `;
+
         // 6. Digital Tasbih
         case 6:
           return `
@@ -1280,9 +1320,160 @@
     }
 
     function setupToolLogic(id) {
+      if (id === 5) {
+        quickNoteSearchQuery = "";
+        renderQuickNotes();
+      }
       if (id === 57) calcLandUnits();
       if (id === 54) convertLength();
     }
+
+    // ---------------------------------------------------------
+    // QUICK NOTES & TO-DO LOGIC WITH DOWNLOAD AS TEXT (.TXT)
+    // ---------------------------------------------------------
+    const defaultNotes = [
+      { id: 1, text: "বাজারের প্রয়োজনীয় তালিকা চেক করুন", done: false },
+      { id: 2, text: "মেগা ইউটিলিটি অফলাইন ফিচারসমূহ পর্যালোচনা", done: true },
+      { id: 3, text: "দৈনিক কাজের লক্ষ্য ও হিসাব সম্পন্ন করুন", done: false }
+    ];
+
+    let quickNotes = JSON.parse(localStorage.getItem("mega_quick_notes") || 'null') || defaultNotes;
+    let quickNoteSearchQuery = "";
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.handleQuickNoteSearch = function(query) {
+      quickNoteSearchQuery = (query || "").trim();
+      const clearBtn = document.getElementById("clearNoteSearchBtn");
+      if (clearBtn) {
+        clearBtn.style.display = quickNoteSearchQuery.length > 0 ? "block" : "none";
+      }
+      renderQuickNotes();
+    };
+
+    window.clearQuickNoteSearch = function() {
+      const input = document.getElementById("quickNoteSearchInput");
+      const clearBtn = document.getElementById("clearNoteSearchBtn");
+      if (input) input.value = "";
+      if (clearBtn) clearBtn.style.display = "none";
+      quickNoteSearchQuery = "";
+      renderQuickNotes();
+    };
+
+    window.renderQuickNotes = function() {
+      const container = document.getElementById("notesListContainer");
+      const countLabel = document.getElementById("notesCountLabel");
+      if (!container) return;
+
+      const q = quickNoteSearchQuery.toLowerCase();
+      const filtered = q
+        ? quickNotes.filter(n => n.text.toLowerCase().includes(q))
+        : quickNotes;
+
+      if (countLabel) {
+        if (q) {
+          countLabel.textContent = `খোঁজার ফলাফল: ${filtered.length}টি (মোট: ${quickNotes.length}টি)`;
+        } else {
+          countLabel.textContent = `নোট তালিকা (${quickNotes.length}টি)`;
+        }
+      }
+
+      if (quickNotes.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:24px 10px; color:var(--text-muted); font-size:13px; background:var(--surface-variant); border-radius:10px;">
+            কোনো নোট বা টাস্ক নেই। উপরে নতুন নোট যোগ করুন!
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:20px 10px; color:var(--text-muted); font-size:13px; background:var(--surface-variant); border-radius:10px;">
+            <p style="margin-bottom:8px;">🔍 "<strong>${escapeHtml(quickNoteSearchQuery)}</strong>" দিয়ে কোনো নোট পাওয়া যায়নি।</p>
+            <button onclick="clearQuickNoteSearch()" style="background:var(--primary-light); color:var(--primary); border:1px solid var(--primary); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">সার্চ মুছুন</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((note) => `
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--surface-variant); border-radius:10px; border:1px solid var(--border); gap:10px;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; margin:0; text-decoration: ${note.done ? 'line-through' : 'none'}; color: ${note.done ? 'var(--text-muted)' : 'var(--text-main)'}; font-size:13.5px; word-break:break-word;">
+            <input type="checkbox" ${note.done ? 'checked' : ''} onchange="toggleQuickNote(${note.id})" style="width:16px; height:16px; cursor:pointer;">
+            <span>${escapeHtml(note.text)}</span>
+          </label>
+          <button onclick="deleteQuickNote(${note.id})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px 6px; font-size:15px; border-radius:6px;" title="মুছে ফেলুন">
+            🗑️
+          </button>
+        </div>
+      `).join('');
+    };
+
+    window.addQuickNote = function() {
+      const input = document.getElementById("quickNoteInput");
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      quickNotes.unshift({
+        id: Date.now(),
+        text: text,
+        done: false
+      });
+      localStorage.setItem("mega_quick_notes", JSON.stringify(quickNotes));
+      input.value = "";
+      renderQuickNotes();
+    };
+
+    window.toggleQuickNote = function(id) {
+      quickNotes = quickNotes.map(n => n.id === id ? { ...n, done: !n.done } : n);
+      localStorage.setItem("mega_quick_notes", JSON.stringify(quickNotes));
+      renderQuickNotes();
+    };
+
+    window.deleteQuickNote = function(id) {
+      quickNotes = quickNotes.filter(n => n.id !== id);
+      localStorage.setItem("mega_quick_notes", JSON.stringify(quickNotes));
+      renderQuickNotes();
+    };
+
+    window.downloadNotesAsText = function() {
+      if (!quickNotes || quickNotes.length === 0) {
+        alert("ডাউনলোড করার মতো কোনো নোট নেই! অনুগ্রহ করে প্রথমে কিছু নোট যোগ করুন।");
+        return;
+      }
+
+      let content = "==================================================\n";
+      content += "         MEGA UTILITY - QUICK NOTES & TO-DO       \n";
+      content += "==================================================\n";
+      content += "Export Date: " + new Date().toLocaleString() + "\n";
+      content += "Total Items: " + quickNotes.length + "\n";
+      content += "Completed:   " + quickNotes.filter(n => n.done).length + "\n";
+      content += "Pending:     " + quickNotes.filter(n => !n.done).length + "\n\n";
+      content += "----------------- TASK LIST ----------------------\n";
+
+      quickNotes.forEach((note, index) => {
+        const mark = note.done ? "[x] " : "[ ] ";
+        const status = note.done ? "(Completed)" : "(Pending)";
+        content += `${index + 1}. ${mark}${note.text} ${status}\n`;
+      });
+
+      content += "\n==================================================\n";
+      content += "Exported securely 100% offline from Mega Utility\n";
+
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Mega_Utility_Notes_${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
 
     // ---------------------------------------------------------
     // CALCULATOR LOGIC

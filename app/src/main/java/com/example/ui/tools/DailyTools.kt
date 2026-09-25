@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -405,6 +408,7 @@ data class NoteItem(val id: Long, val text: String, val isDone: Boolean = false)
 
 @Composable
 fun QuickNotesTool() {
+    val context = LocalContext.current
     var notes by remember {
         mutableStateOf(
             listOf(
@@ -415,6 +419,42 @@ fun QuickNotesTool() {
         )
     }
     var newText by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredNotes = remember(notes, searchQuery) {
+        val q = searchQuery.trim().lowercase()
+        if (q.isEmpty()) notes
+        else notes.filter { it.text.lowercase().contains(q) }
+    }
+
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { stream ->
+                    val sb = StringBuilder()
+                    sb.append("==================================================\n")
+                    sb.append("         MEGA UTILITY - QUICK NOTES & TO-DO       \n")
+                    sb.append("==================================================\n")
+                    sb.append("Export Date: ").append(SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())).append("\n")
+                    sb.append("Total Items: ").append(notes.size).append("\n")
+                    sb.append("Completed:   ").append(notes.count { it.isDone }).append("\n")
+                    sb.append("Pending:     ").append(notes.count { !it.isDone }).append("\n\n")
+                    sb.append("----------------- TASK LIST ----------------------\n")
+                    notes.forEachIndexed { index, note ->
+                        val mark = if (note.isDone) "[x] " else "[ ] "
+                        val status = if (note.isDone) "(Completed)" else "(Pending)"
+                        sb.append("${index + 1}. $mark${note.text} $status\n")
+                    }
+                    sb.append("\n==================================================\n")
+                    sb.append("Exported securely 100% offline from Mega Utility\n")
+                    stream.write(sb.toString().toByteArray(Charsets.UTF_8))
+                }
+                Toast.makeText(context, "Notes downloaded as .txt successfully!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(context, "Failed to export: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -439,36 +479,119 @@ fun QuickNotesTool() {
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(10.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(max = 350.dp)) {
-            items(notes) { note ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (note.isDone) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                        else MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+        // Real-time Search Bar inside Quick Notes modal
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Search notes in real-time...") },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Clear search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("quick_notes_search_input"),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                if (searchQuery.isNotBlank()) "Search Results (${filteredNotes.size} of ${notes.size})"
+                else "Task List (${notes.size})",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+            OutlinedButton(
+                onClick = {
+                    if (notes.isEmpty()) {
+                        Toast.makeText(context, "No notes to export!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val fileName = "Mega_Utility_Notes_${SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())}.txt"
+                        exportLauncher.launch(fileName)
+                    }
+                },
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                modifier = Modifier.testTag("download_as_text_button")
+            ) {
+                Icon(
+                    Icons.Default.Download,
+                    contentDescription = "Download Text",
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text("Download as Text (.txt)", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        if (filteredNotes.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (searchQuery.isNotBlank()) "No notes matching \"$searchQuery\"" else "No notes added yet.",
+                    color = MaterialTheme.colorScheme.outline,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.heightIn(max = 350.dp)) {
+                items(filteredNotes, key = { it.id }) { note ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (note.isDone) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
-                        Checkbox(
-                            checked = note.isDone,
-                            onCheckedChange = { checked ->
-                                notes = notes.map { if (it.id == note.id) it.copy(isDone = checked) else it }
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = note.isDone,
+                                onCheckedChange = { checked ->
+                                    notes = notes.map { if (it.id == note.id) it.copy(isDone = checked) else it }
+                                }
+                            )
+                            Text(
+                                text = note.text,
+                                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (note.isDone) FontWeight.Normal else FontWeight.Medium
+                            )
+                            IconButton(onClick = { notes = notes.filter { it.id != note.id } }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
                             }
-                        )
-                        Text(
-                            text = note.text,
-                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (note.isDone) FontWeight.Normal else FontWeight.Medium
-                        )
-                        IconButton(onClick = { notes = notes.filter { it.id != note.id } }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
